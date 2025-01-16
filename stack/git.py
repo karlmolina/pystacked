@@ -39,11 +39,58 @@ def get_current_commit():
         print(f"Error getting current commit: {e}")
         return None
 
+
 def get_commit_of_branch(branch_name):
     try:
         # Run the Git command to get the commit hash of the given branch
-        commit_hash = subprocess.check_output(["git", "rev-parse", branch_name]).strip().decode("utf-8")
+        commit_hash = (
+            subprocess.check_output(["git", "rev-parse", branch_name])
+            .strip()
+            .decode("utf-8")
+        )
         return commit_hash
     except subprocess.CalledProcessError as e:
         print(f"Error getting commit of branch '{branch_name}': {e}")
-        return None
+    return None
+
+
+def list_branches_at_commit(commit_hash):
+    try:
+        # Run the git command to get all branches containing the commit
+        result = subprocess.run(
+            ["git", "branch", "--contains", commit_hash],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        # Split the output into lines and clean up extra spaces
+        branches = result.stdout.strip().split("\n")
+
+        if branches:
+            print(f"Branches containing commit {commit_hash}:")
+            for branch in branches:
+                print(branch.strip())
+        else:
+            print(f"No branches contain commit {commit_hash}.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing git command: {e}")
+    except FileNotFoundError:
+        print("Git is not installed or not found in the system path.")
+
+
+def get_parent_of_branch(branch_name):
+    try:
+        # Run the Git command to get the parent branch of the given branch
+        parent_branch = (
+            subprocess.check_output(
+                ["git", "rev-parse", "--abbrev-ref", f"{branch_name}^"]
+            )
+            .strip()
+            .decode("utf-8")
+        )
+        return parent_branch
+    except subprocess.CalledProcessError as e:
+        print(f"Error getting parent branch of '{branch_name}': {e}")
+    return None
