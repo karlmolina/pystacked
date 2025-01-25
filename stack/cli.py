@@ -1,12 +1,12 @@
 import typer
-from collections import namedtuple
-from stack.file import print_tuples, read_file_to_tuples, save_tuples_to_file
-from stack.git import get_commit_of_branch, get_current_commit, get_current_git_branch
+from stack.file import print_dict, read_file_to_dict, save_dict_to_file
+from stack.git import create_new_branch, get_current_commit, get_current_git_branch
 from stack.stackitem import StackItem
 
 app = typer.Typer(no_args_is_help=True)
 
 # Define the namedtuple for StackItem
+
 
 @app.command()
 def sync(branch_name: str):
@@ -14,31 +14,25 @@ def sync(branch_name: str):
 
 
 @app.command()
-def add():
+def add(branch_name: str):
     current_branch = get_current_git_branch()
     current_commit = get_current_commit()
 
-    # Read existing stack from file
-    stack_items = read_file_to_tuples(".stack")
+    stack_items = read_file_to_dict(".stack")
 
     if not stack_items:
         stack_items = {current_branch: StackItem(current_branch, current_commit)}
-    else:
-        # Get the parent branch from the last stack item
-        parent_item = stack_items[-1]
-        if parent_item.branch == current_branch:
-            print("Already at top of stack")
-            print_tuples(stack_items)
-            return
+    elif current_branch not in stack_items:
+        print("Error: Current branch not found in the stack.")
+        return
 
-        # Get the commit hash of the parent branch
-        commit_at_parent = get_commit_of_branch(parent_item.branch)
-        new_item = StackItem(current_branch, parent_item.branch, commit_at_parent)
-        stack_items.append(new_item)
+    create_new_branch(branch_name)
+    stack_items[branch_name] = StackItem(branch_name, current_commit)
+    stack_items[branch_name].parent = stack_items[current_branch]
 
     # Save the updated stack to the file (convert namedtuple to a list of values)
-    save_tuples_to_file([item for item in stack_items], ".stack")
-    print_tuples(stack_items)
+    save_dict_to_file(stack_items, ".stack")
+    print_dict(stack_items)
 
 
 def main():

@@ -1,4 +1,3 @@
-
 from typing import Dict
 from stack.stackitem import StackItem
 
@@ -7,7 +6,7 @@ def save_dict_to_file(dictionary, filename):
     try:
         with open(filename, "w") as file:
             for key, value in dictionary.items():
-                file.write(f"{key} {value}\n")
+                file.write(f"{value}\n")
         print(f"Dictionary saved to {filename}.")
     except Exception as e:
         print(f"Error saving dictionary to file: {e}")
@@ -65,3 +64,8 @@ def print_tuples(tuples_list):
     for tpl in tuples_list:
         # Join tuple elements with space and write to the file
         print(" ".join(map(str, tpl)))
+
+
+def print_dict(dictionary):
+    for key, value in dictionary.items():
+        print(value)

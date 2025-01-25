@@ -1,4 +1,16 @@
 import subprocess
+import sys
+
+
+def run_git_command(command):
+    """Runs a git command and returns the output."""
+    try:
+        result = subprocess.run(command, check=True, text=True, capture_output=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command: {e}")
+        print(f"Output: {e.output}")
+        sys.exit(1)
 
 
 def get_current_git_branch():
@@ -13,8 +25,7 @@ def get_current_git_branch():
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"Error getting current branch: {e.stderr.strip()}")
-        return None
+        raise Exception(f"Error getting current branch: {e.stderr.strip()}")
 
 
 def create_new_branch(branch_name: str):
